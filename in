@@ -1,0 +1,13 @@
+#!/bin/bash
+# implements the Concourse resource specification for 'in'
+
+# TODO: right now this is implemented as a no-op that simply
+# logs its inputs. Ideally what we'd like to do here is have
+# it check the sha256 of the artifact so that we can avoid
+# re-uploads.
+
+echo "'in' not implemented." >&2
+echo <&0 >&2
+
+echo '{}'
+exit 0

@@ -1,0 +1,51 @@
+#!/bin/bash
+# implements the Concourse resource specification for 'out'
+# to publish artifacts via HTTP PUT
+set -eu
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+payload=$TMPDIR/http-put-resource-request
+cat > "$payload" <&0
+
+# report our input payload with secrets redacted
+jq '. | .source.password |= "*******" | .source.username |= "*******"' < "$payload"
+
+uploads_user=$(jq -r '.source.username' < "$payload")
+uploads_password=$(jq -r '.source.username' < "$payload")
+base_url=$(jq -r '.source.url' < "$payload" )
+from_path=$(jq -r '.params.from' < "$payload")
+to_path=$(jq -r '.params.to' < "$payload")
+
+checksum=$(sha256sum "$from_path" | awk -F' +' '{print $1}')
+url="${base_url}/${to_path}"
+
+echo "file: $from_path"
+echo "checksum: $checksum"
+echo "uploading to: $url"
+
+curl -su "${uploads_user}:${uploads_password}" \
+     --upload-file "$from_path" \
+     "$url"
+
+report=$TMPDIR/http-put-report
+
+cat > "$report" <<EOF
+{
+  "version": { "sha256": "$checksum" },
+  "metadata": [
+    { "name": "url", "value": "$url" },
+    { "name": "build_job", "value": "$BUILD_JOB_NAME" },
+    { "name": "build_name", "value": "$BUILD_NAME" },
+    { "name": "build_id", "value": "$BUILD_ID" },
+    { "name": "build_pipeline_name", "value": "$BUILD_PIPELINE_NAME" },
+    { "name": "build_team_name", "value": "$BUILD_TEAM_NAME" },
+    { "name": "atc_external_url", "value": "$ATC_EXTERNAL_URL" },
+  ]
+}
+EOF
+
+# send to both logs and the expected output
+cat "$report"
+cat "$report" >&3
