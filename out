@@ -77,9 +77,10 @@ if [[ "$dryrun" == "true" ]]; then
     curl="echo curl"
 fi
 
-$curl -su "${uploads_user}:${uploads_password}" \
-     --upload-file "$from_path" \
-     "$url"
+$curl --fail \
+      -su "${uploads_user}:${uploads_password}" \
+      --upload-file "$from_path" \
+      "$url"
 
 cat > "$report" <<EOF
 {
@@ -91,7 +92,7 @@ cat > "$report" <<EOF
     { "name": "build_id", "value": "$BUILD_ID" },
     { "name": "build_pipeline_name", "value": "$BUILD_PIPELINE_NAME" },
     { "name": "build_team_name", "value": "$BUILD_TEAM_NAME" },
-    { "name": "atc_external_url", "value": "$ATC_EXTERNAL_URL" },
+    { "name": "atc_external_url", "value": "$ATC_EXTERNAL_URL" }
   ]
 }
 EOF
