@@ -46,7 +46,7 @@ resource_types:
 resources:
   - name: artifact-publish
     type: http-publish
-    icon: docker
+    icon: file-upload
     source:
       url: "https://ci.example.com/releases"
       username: ((http-publish-username))
