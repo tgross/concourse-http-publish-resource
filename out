@@ -65,6 +65,7 @@ fi
 if [[ "$archive" == "true" ]]; then
     new_filename="${filename}.tar.gz"
     tar -czf "$new_filename" "$filename"
+    filename="$new_filename"
 fi
 
 from_path="${dirname}/${filename}"
