@@ -27,7 +27,7 @@ echo "input payload: "
 jq '. | .source.password |= "*******" | .source.username |= "*******"' < "$payload"
 
 uploads_user=$(jq -r '.source.username' < "$payload")
-uploads_password=$(jq -r '.source.username' < "$payload")
+uploads_password=$(jq -r '.source.password' < "$payload")
 base_url=$(jq -r '.source.url' < "$payload" )
 from_path=$(jq -r '.params.from' < "$payload")
 to_path=$(jq -r '.params.to' < "$payload")
