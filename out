@@ -17,10 +17,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
+echo "working directory: $(pwd)"
+
 # concourse request
 cat > "$payload" <&0
 
 # report our input payload with secrets redacted
+echo "input payload: "
 jq '. | .source.password |= "*******" | .source.username |= "*******"' < "$payload"
 
 uploads_user=$(jq -r '.source.username' < "$payload")
