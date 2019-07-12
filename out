@@ -6,7 +6,18 @@ set -eu
 exec 3>&1 # make stdout available as fd 3 for the result
 exec 1>&2 # redirect all output to stderr for logging
 
-payload=$TMPDIR/http-put-resource-request
+# we have some multi-line JSON payloads to handle, so just
+# drop them in temporary files that we make sure to clean up.
+report=./.http-put-report
+payload=./.http-publish-resource-request
+
+cleanup() {
+    rm -f "$payload"
+    rm -f "$report"
+}
+trap cleanup EXIT
+
+# concourse request
 cat > "$payload" <&0
 
 # report our input payload with secrets redacted
@@ -18,18 +29,54 @@ base_url=$(jq -r '.source.url' < "$payload" )
 from_path=$(jq -r '.params.from' < "$payload")
 to_path=$(jq -r '.params.to' < "$payload")
 
-checksum=$(sha256sum "$from_path" | awk -F' +' '{print $1}')
+# optional params
+os=$(jq -r '.params.os | select (.!=null)' < "$payload")
+arch=$(jq -r '.params.arch | select (.!=null)' < "$payload")
+archive=$(jq -r '.params.archive | select (.!=null)' < "$payload")
+datefmt=$(jq -r '.params.datefmt | select (.!=null)' < "$payload")
+dryrun=$(jq -r '.params.dryrun | select (.!=null)' < "$payload")
+
 url="${base_url}/${to_path}"
+dirname=$(dirname "$from_path")
+filename=$(basename "$from_path")
+
+if [[ -n "$os" ]]; then
+    filename="${filename}_${os}"
+    mv "${from_path}" "${dirname}/${filename}"
+    from_path="${dirname}/${filename}"
+fi
+if [[ -n "$arch" ]]; then
+    filename="${filename}_${arch}"
+    mv "${from_path}" "${dirname}/${filename}"
+    from_path="${dirname}/${filename}"
+fi
+if [[ -n "$datefmt" ]]; then
+    timestamp=$(date -u "$datefmt")
+    filename="${filename}_${timestamp}"
+    mv "${from_path}" "${dirname}/${filename}"
+    from_path="${dirname}/${filename}"
+fi
+
+if [[ "$archive" == "true" ]]; then
+    tar -czf "${from_path}.tar.gz" "${from_path}"
+    from_path="${from_path}.tar.gz"
+fi
+
+checksum=$(sha256sum "$from_path" | awk -F' +' '{print $1}')
 
 echo "file: $from_path"
 echo "checksum: $checksum"
 echo "uploading to: $url"
 
-curl -su "${uploads_user}:${uploads_password}" \
+# allow testing without an actual upload
+curl=curl
+if [[ "$dryrun" == "true" ]]; then
+    curl="echo curl"
+fi
+
+$curl -su "${uploads_user}:${uploads_password}" \
      --upload-file "$from_path" \
      "$url"
-
-report=$TMPDIR/http-put-report
 
 cat > "$report" <<EOF
 {

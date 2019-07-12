@@ -7,3 +7,6 @@ RUN apt-get update \
 COPY check /opt/resource/check
 COPY in /opt/resource/in
 COPY out /opt/resource/out
+
+# execute the tests as part of the build
+RUN cd ./test && ./test

@@ -1,0 +1,12 @@
+{
+  "source": {
+    "url": "https://ci.example.com/builds",
+    "username": "exampleuser",
+    "password": "password1"
+  },
+  "params": {
+    "from": "artifacts/artifact-minimal",
+    "to": "artifacts-minimal",
+    "dryrun": true
+  }
+}

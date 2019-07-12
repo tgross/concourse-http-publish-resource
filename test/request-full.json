@@ -1,0 +1,16 @@
+{
+  "source": {
+    "url": "https://ci.example.com/builds",
+    "username": "exampleuser",
+    "password": "password1"
+  },
+  "params": {
+    "from": "artifacts/artifact-full",
+    "to": "artifacts-full",
+    "os": "linux",
+    "arch": "amd64",
+    "datefmt": "+%Y%m%dT%H%MZ",
+    "archive": true,
+    "dryrun": true
+  }
+}
