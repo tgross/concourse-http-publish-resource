@@ -43,27 +43,33 @@ url="${base_url}/${to_path}"
 dirname=$(dirname "$from_path")
 filename=$(basename "$from_path")
 
+pushd "$dirname" > /dev/null
+
 if [[ -n "$os" ]]; then
-    filename="${filename}_${os}"
-    mv "${from_path}" "${dirname}/${filename}"
-    from_path="${dirname}/${filename}"
+    new_filename="${filename}_${os}"
+    mv "./$filename" "$new_filename"
+    filename="$new_filename"
 fi
 if [[ -n "$arch" ]]; then
-    filename="${filename}_${arch}"
-    mv "${from_path}" "${dirname}/${filename}"
-    from_path="${dirname}/${filename}"
+    new_filename="${filename}_${arch}"
+    mv "./$filename" "$new_filename"
+    filename="$new_filename"
 fi
 if [[ -n "$datefmt" ]]; then
     timestamp=$(date -u "$datefmt")
-    filename="${filename}_${timestamp}"
-    mv "${from_path}" "${dirname}/${filename}"
-    from_path="${dirname}/${filename}"
+    new_filename="${filename}_${timestamp}"
+    mv "./$filename" "$new_filename"
+    filename="$new_filename"
 fi
 
 if [[ "$archive" == "true" ]]; then
-    tar -czf "${from_path}.tar.gz" "${from_path}"
-    from_path="${from_path}.tar.gz"
+    new_filename="${filename}.tar.gz"
+    tar -czf "$new_filename" "$filename"
 fi
+
+from_path="${dirname}/${filename}"
+
+popd > /dev/null
 
 checksum=$(sha256sum "$from_path" | awk -F' +' '{print $1}')
 
