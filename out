@@ -86,7 +86,7 @@ fi
 $curl --fail \
       -su "${uploads_user}:${uploads_password}" \
       --upload-file "$from_path" \
-      "$url"
+      "${url}/${filename}"
 
 cat > "$report" <<EOF
 {
