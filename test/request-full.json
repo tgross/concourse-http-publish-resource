@@ -6,11 +6,8 @@
   },
   "params": {
     "from": "artifacts/artifact-full",
-    "to": "artifacts-full",
-    "os": "linux",
-    "arch": "amd64",
-    "datefmt": "+%Y%m%dT%H%MZ",
-    "archive": true,
+    "to": "releases/${BUILD_JOB_NAME}/${BUILD_DATETIME}/artifact-full",
+    "datefmt": "+%Y-%m-%d",
     "dryrun": true
   }
 }

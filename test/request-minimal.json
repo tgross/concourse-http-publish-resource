@@ -6,7 +6,7 @@
   },
   "params": {
     "from": "artifacts/artifact-minimal",
-    "to": "artifacts-minimal",
+    "to": "releases/artifact-minimal",
     "dryrun": true
   }
 }

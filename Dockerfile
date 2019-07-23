@@ -1,7 +1,7 @@
 FROM debian:buster
 
 RUN apt-get update \
-    && apt-get install -y curl jq \
+    && apt-get install -y curl jq gettext \
     && rm -rf /var/lib/apt/lists/*
 
 COPY check /opt/resource/check

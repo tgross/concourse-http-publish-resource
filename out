@@ -26,52 +26,22 @@ cat > "$payload" <&0
 echo "input payload: "
 jq '. | .source.password |= "*******" | .source.username |= "*******"' < "$payload"
 
+# optional params
+datefmt=$(jq -r '.params.datefmt | select (.!=null)' < "$payload")
+if [ -n "$datefmt" ]; then
+    datefmt='+%Y%m%dT%H%MZ'
+fi
+BUILD_DATETIME=$(date -u $datefmt)
+export BUILD_DATETIME
+
 uploads_user=$(jq -r '.source.username' < "$payload")
 uploads_password=$(jq -r '.source.password' < "$payload")
 base_url=$(jq -r '.source.url' < "$payload" )
 from_path=$(jq -r '.params.from' < "$payload")
 to_path=$(jq -r '.params.to' < "$payload")
-
-# optional params
-os=$(jq -r '.params.os | select (.!=null)' < "$payload")
-arch=$(jq -r '.params.arch | select (.!=null)' < "$payload")
-archive=$(jq -r '.params.archive | select (.!=null)' < "$payload")
-datefmt=$(jq -r '.params.datefmt | select (.!=null)' < "$payload")
 dryrun=$(jq -r '.params.dryrun | select (.!=null)' < "$payload")
 
-url="${base_url}/${to_path}"
-dirname=$(dirname "$from_path")
-filename=$(basename "$from_path")
-
-pushd "$dirname" > /dev/null
-
-if [[ -n "$os" ]]; then
-    new_filename="${filename}_${os}"
-    mv "./$filename" "$new_filename"
-    filename="$new_filename"
-fi
-if [[ -n "$arch" ]]; then
-    new_filename="${filename}_${arch}"
-    mv "./$filename" "$new_filename"
-    filename="$new_filename"
-fi
-if [[ -n "$datefmt" ]]; then
-    timestamp=$(date -u "$datefmt")
-    new_filename="${filename}_${timestamp}"
-    mv "./$filename" "$new_filename"
-    filename="$new_filename"
-fi
-
-if [[ "$archive" == "true" ]]; then
-    new_filename="${filename}.tar.gz"
-    tar -czf "$new_filename" "$filename"
-    filename="$new_filename"
-fi
-
-from_path="${dirname}/${filename}"
-
-popd > /dev/null
-
+url=$(echo "${base_url}/${to_path}" | envsubst)
 checksum=$(sha256sum "$from_path" | awk -F' +' '{print $1}')
 
 echo "file: $from_path"
@@ -87,7 +57,7 @@ fi
 $curl --fail \
       -su "${uploads_user}:${uploads_password}" \
       --upload-file "$from_path" \
-      "${url}/${filename}"
+      "${url}"
 
 cat > "$report" <<EOF
 {

@@ -11,13 +11,6 @@ mkdir -p ./artifacts
 echo 'I am the first artifact' > ./artifacts/artifact-full
 echo 'I am the second artifact' > ./artifacts/artifact-minimal
 
-# c6f20ae139f8ce5a362c78847a400248936ca8b630b305b85300b5207e6b3daf  artifact-full
-# c6f20ae139f8ce5a362c78847a400248936ca8b630b305b85300b5207e6b3daf  artifact-full_linux_amd64
-# c90b9ecac899521cd70385b03e1fd07208f3440d4d2a42af2619cb5d9843c5ad  artifact-full_linux_amd64.tar.gz
-# 5fb30830d9bcd9a40faab8355cc354f6cf95582333fa677a963feba29686b9c0  artifact-full.tar.gz
-# a7eabac7dd3b94c15c93d890f7a59b8145d90284114a5d0ad1167b142faf3b58  artifact-minimal
-# 8af3d8676e8d6121986182427dbf459f8f44bb4754779f891143e1b46fa85ad5  artifact-minimal.tar.gz
-
 export BUILD_JOB_NAME=1
 export BUILD_NAME="test"
 export BUILD_ID="52026c3b-3fa3-4759-ba29-61a2752e0a06"
@@ -26,13 +19,5 @@ export BUILD_TEAM_NAME="example-team"
 export ATC_EXTERNAL_URL="https://ci.example.com"
 
 # run ./out with both inputs. we don't want the report, just logs.
-../out < ./request-full.json    1>/dev/null
-../out < ./request-minimal.json 1>/dev/null
-
-
-# c6f20ae139f8ce5a362c78847a400248936ca8b630b305b85300b5207e6b3daf  artifact-full
-# c6f20ae139f8ce5a362c78847a400248936ca8b630b305b85300b5207e6b3daf  artifact-full_linux_amd64
-# c90b9ecac899521cd70385b03e1fd07208f3440d4d2a42af2619cb5d9843c5ad  artifact-full_linux_amd64.tar.gz
-# 5fb30830d9bcd9a40faab8355cc354f6cf95582333fa677a963feba29686b9c0  artifact-full.tar.gz
-# a7eabac7dd3b94c15c93d890f7a59b8145d90284114a5d0ad1167b142faf3b58  artifact-minimal
-# 8af3d8676e8d6121986182427dbf459f8f44bb4754779f891143e1b46fa85ad5  artifact-minimal.tar.gz
+../out < ./request-full.json      1>/dev/null
+../out < ./request-minimal.json   1>/dev/null

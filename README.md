@@ -20,16 +20,12 @@ Not currently implemented.
 
 ## `put`
 
-Makes a HTTP PUT of the artifact. Optional parameters for this action can archive the file as a `tar.gz` and/or rename the file to include the build architecture or datestamp.
+Makes a HTTP PUT of the artifact.
 
 * `from`: [required] The relative path to get the artifact.
-* `to`: [required] The subpath to which to upload the artifact.
-* `os`: [optional] The operating system name to add to the artifact file name (ex. `linux`).
-* `arch`: [optional] The architecture to add to the artifact file name (ex. `amd64`).
-* `datefmt`: [optional] The format of the UTC timestamp added to the artifact file name (uses `date -u` under the hood, so ex. `+%Y%m%dT%H%MZ`).
-* `archive`: [optional] A boolean value to make a gzipped tarball of the artifact.
-* `dryrun`: [optional] A boolean value to rename the artifact and print metadata, but not actually upload. Used for testing.
-
+* `to`: [required] The path to which to upload the artifact. (If you are uploading to webdav or similar, this should include the destination file name.) Will interpolate the [resource metadata](https://concourse-ci.org/implementing-resource-types.html#resource-metadata) fields as well as a `$BUILD_DATETIME` field as formatted by the `datefmt` field (see below).
+* `datefmt`: [optional] The format of the UTC timestamp added to the artifact file name (uses `date -u` under the hood). Defaults to `+%Y%m%dT%H%MZ`.
+* `dryrun`: [optional] A boolean value to print metadata, but not actually upload. Used for testing.
 
 Example usage of optional flags:
 
@@ -57,15 +53,12 @@ jobs:
     plan:
       get: artifact
       put: artifact-publish
-        from: "artifact"
-        to: "project-one"
-        os: "linux"
-        arch: "amd64"
+        from: "dist/artifact.tar.gz"
+        to: "project-one/${BUILD_DATE}/artifact.tar.gz"
         datefmt: "+%Y%m%dT%H%MZ"
-        archive: true
 ```
 
-Results in the file being pushed to `https://ci.example.com/releases/project-one/artifact_linux_amd64_20190712T1250Z.tar.gz`
+This results in the file being pushed to `https://ci.example.com/releases/project-one/20190712T1250Z/artifact.tar.gz`
 
 
 ## FAQ
@@ -74,4 +67,4 @@ Q: Is this done?
 A: No. I want to implement `check` and `in`.
 
 Q: Why not use [`http-put-resource`](https://github.com/lorands/http-put-resource)
-A: Because I don't want to have to trust a community-built Docker image for artifact uploads, and because having a whole-ass custom golang application to do a HTTP PUT seems excessive. Also, I want to include archiving as part of the push process.
+A: That resource publishes an entire directory, which means it has no reasonable way to implement `check` with the hash of the uploaded files. I also don't want to have to trust a community-built Docker image for artifact uploads, and because having a whole-ass custom golang application to do a HTTP PUT seems excessive. And it has no license. =(
